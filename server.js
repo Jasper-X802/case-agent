@@ -1,4 +1,4 @@
-ï»¿const express = require("express");
+const express = require("express");
 const multer = require("multer");
 const mammoth = require("mammoth");
 const pdfParse = require("pdf-parse");
@@ -8,10 +8,10 @@ const path = require("path");
 const crypto = require("crypto");
 
 const app = express();
-const PORT = 3900;
+const PORT = process.env.PORT || 3900;
 const FALLBACK_KEY = "sk-gRBj4F5geXno8iucOkmVlfOFXtbebMQj";
 if (!process.env.SENSENOVA_API_KEY) process.env.SENSENOVA_API_KEY = FALLBACK_KEY;
-const KB_DIR = "C:/Users/admin/Downloads/çŸ¥è¯†åº“";
+const KB_DIR = "C:/Users/admin/Downloads/ÖªÊ¶¿â";
 const UPLOAD_DIR = path.join(__dirname, "uploads");
 const SESS_DIR = path.join(__dirname, "sessions");
 
@@ -51,7 +51,7 @@ function ensureConv(modData) {
   if (!modData.conversations) {
     const id = generateId();
     modData.conversations = {};
-    modData.conversations[id] = { id, name: 'ä¼šè¯ 1', history: [], created: Date.now() };
+    modData.conversations[id] = { id, name: '»á»° 1', history: [], created: Date.now() };
     modData.activeConv = id;
   }
   return modData.activeConv;
@@ -72,7 +72,7 @@ function autoName(modData) {
   const conv = modData.conversations[modData.activeConv];
   if (!conv) return;
   const first = conv.history.find(m => m.role === 'user');
-  conv.name = first ? first.content.substring(0, 20) + '...' : 'ä¼šè¯ ' + Object.keys(modData.conversations).length;
+  conv.name = first ? first.content.substring(0, 20) + '...' : '»á»° ' + Object.keys(modData.conversations).length;
 }
 
 async function extractText(fp) {
@@ -81,7 +81,7 @@ async function extractText(fp) {
     if (ext === ".docx") { const r = await mammoth.extractRawText({ path: fp }); return r.value; }
     if (ext === ".pdf")  { const b = fs.readFileSync(fp); const d = await pdfParse(b); return d.text; }
     if (ext === ".txt")  return fs.readFileSync(fp, "utf-8");
-  } catch (e) { console.error("æå–é”™è¯¯:", e.message); }
+  } catch (e) { console.error("ÌáÈ¡´íÎó:", e.message); }
   return "";
 }
 
@@ -127,7 +127,7 @@ async function loadKB() {
       for (let i = 0; i < p.length; i += 800)
         kbTexts.push(p.substring(i, i + 800).trim());
   }
-  console.log(`çŸ¥è¯†åº“åŠ è½½å®Œæˆ: ${files.length} ç¯‡è®ºæ–‡, ${kbTexts.length} æ–‡æœ¬å—`);
+  console.log(`ÖªÊ¶¿â¼ÓÔØÍê³É: ${files.length} ÆªÂÛÎÄ, ${kbTexts.length} ÎÄ±¾¿é`);
 }
 
 const API_URL = "https://token.sensenova.cn/v1/chat/completions";
@@ -135,7 +135,7 @@ const API_URL = "https://token.sensenova.cn/v1/chat/completions";
 async function callLLM(msgs, temp) {
   temp = temp || 0.7;
   const key = process.env.SENSENOVA_API_KEY;
-  if (!key) return { error: "æœªé…ç½® API_KEY" };
+  if (!key) return { error: "Î´ÅäÖÃ API_KEY" };
   try {
     const r = await fetch(API_URL, {
       method: "POST",
@@ -152,7 +152,7 @@ async function extractRoles(text) {
   const key = process.env.SENSENOVA_API_KEY;
   if (key) {
     const r = await callLLM([
-      { role: "system", content: "ä½ æ˜¯ä¸€ä¸ªæ¡ˆä¾‹è§’è‰²æå–åŠ©æ‰‹ã€‚ä»ä»¥ä¸‹æ¡ˆä¾‹æ–‡æœ¬ä¸­æå–æ‰€æœ‰å…³é”®çš„åˆ©ç›Šç›¸å…³æ–¹äººç‰©/è§’è‰²ã€‚è€ƒè™‘ï¼šæ”¿åºœå®˜å‘˜ã€ä¼ä¸šäººå‘˜ã€ç¾¤ä¼—ã€æŠ€æœ¯äººå‘˜ç­‰å„ç±»è§’è‰²ã€‚åªè¾“å‡ºJSONæ•°ç»„ï¼Œæ ¼å¼[{\"name\":\"å§“å\",\"title\":\"èº«ä»½/èŒåŠ¡\"}], ä¸è¦å…¶ä»–æ–‡å­—ã€‚æ¯ä¸ªå¯¹è±¡å¿…é¡»åŒ…å«nameå’Œtitleã€‚" },
+      { role: "system", content: "ÄãÊÇÒ»¸ö°¸Àı½ÇÉ«ÌáÈ¡ÖúÊÖ¡£´ÓÒÔÏÂ°¸ÀıÎÄ±¾ÖĞÌáÈ¡ËùÓĞ¹Ø¼üµÄÀûÒæÏà¹Ø·½ÈËÎï/½ÇÉ«¡£¿¼ÂÇ£ºÕş¸®¹ÙÔ±¡¢ÆóÒµÈËÔ±¡¢ÈºÖÚ¡¢¼¼ÊõÈËÔ±µÈ¸÷Àà½ÇÉ«¡£Ö»Êä³öJSONÊı×é£¬¸ñÊ½[{\"name\":\"ĞÕÃû\",\"title\":\"Éí·İ/Ö°Îñ\"}], ²»ÒªÆäËûÎÄ×Ö¡£Ã¿¸ö¶ÔÏó±ØĞë°üº¬nameºÍtitle¡£" },
       { role: "user", content: text.substring(0, 6000) }
     ], 0.1);
     if (r.text) {
@@ -165,14 +165,14 @@ async function extractRoles(text) {
   }
   // Fallback: keyword-based
   const lines = text.split("\n");
-  const kws = ["ä¹¦è®°","å±€é•¿","ä¸»ä»»","é˜Ÿé•¿","é•‡é•¿","ä¹¡é•¿","æ‘é•¿","ç»ç†","æ€»è£","æ€»ç›‘","å·¥ç¨‹å¸ˆ","æŠ€æœ¯å‘˜","ç½‘æ ¼å‘˜","å¿—æ„¿è€…","æ‘æ°‘","å±…æ°‘","å•†æˆ·","éª‘æ‰‹","å¸æœº","æ•™æˆ","ä¸“å®¶","ä»£è¡¨","è´Ÿè´£äºº","ä¸»å¸­"];
+  const kws = ["Êé¼Ç","¾Ö³¤","Ö÷ÈÎ","¶Ó³¤","Õò³¤","Ïç³¤","´å³¤","¾­Àí","×Ü²Ã","×Ü¼à","¹¤³ÌÊ¦","¼¼ÊõÔ±","Íø¸ñÔ±","Ö¾Ô¸Õß","´åÃñ","¾ÓÃñ","ÉÌ»§","ÆïÊÖ","Ë¾»ú","½ÌÊÚ","×¨¼Ò","´ú±í","¸ºÔğÈË","Ö÷Ï¯"];
   const found = [], seen = new Set();
   for (const line of lines) {
     for (const kw of kws) {
       const idx = line.indexOf(kw);
       if (idx >= 2) {
         let start = idx - 1;
-        while (start > 0 && !/[ã€‚ï¼Œï¼›ï¼šã€ï¼ï¼Ÿ\s\n]/.test(line[start-1]) && idx-start < 6) start--;
+        while (start > 0 && !/[¡££¬£»£º¡¢£¡£¿\s\n]/.test(line[start-1]) && idx-start < 6) start--;
         const name = line.substring(start, idx + kw.length).trim();
         if (name.length >= 2 && name.length <= 12 && !seen.has(name)) {
           seen.add(name);
@@ -183,14 +183,14 @@ async function extractRoles(text) {
     }
     if (found.length >= 12) break;
   }
-  return found.length > 0 ? found : [{name:"åˆ†æäººå‘˜",title:"è§’è‰²1"},{name:"å‚ä¸æ–¹",title:"è§’è‰²2"},{name:"è§‚å¯Ÿè€…",title:"è§’è‰²3"}];
+  return found.length > 0 ? found : [{name:"·ÖÎöÈËÔ±",title:"½ÇÉ«1"},{name:"²ÎÓë·½",title:"½ÇÉ«2"},{name:"¹Û²ìÕß",title:"½ÇÉ«3"}];
 }
 
 async function extractDPs(text) {
   const key = process.env.SENSENOVA_API_KEY;
   if (!key) return [];
   const r = await callLLM([
-    { role: "system", content: "ä½ æ˜¯ä¸€ä¸ªæ¡ˆä¾‹åˆ†æä¸“å®¶ã€‚é˜…è¯»ä»¥ä¸‹æ¡ˆä¾‹æ–‡æœ¬ï¼Œæ‰¾å‡ºæ¡ˆä¾‹å‘å±•è¿‡ç¨‹ä¸­å…³é”®çš„3-5ä¸ªå†³ç­–èŠ‚ç‚¹ã€‚æ¯ä¸ªå†³ç­–èŠ‚ç‚¹åº”è¯¥æ˜¯æ¡ˆä¾‹ä¸­æŸä¸ªè§’è‰²é¢ä¸´é‡è¦é€‰æ‹©çš„æ—¶åˆ»ã€‚\n\nè¾“å‡ºæ ¼å¼ä¸ºJSONæ•°ç»„ï¼Œæ¯ä¸ªå…ƒç´ ï¼š{\"node\":\"å†³ç­–èŠ‚ç‚¹æè¿°\",\"question\":\"å‘ç”¨æˆ·æå‡ºçš„é—®é¢˜\",\"options\":[\"é€‰é¡¹1\",\"é€‰é¡¹2\",\"é€‰é¡¹3\"]}\n\næ³¨æ„ï¼š\n1. æ¯ä¸ªå†³ç­–èŠ‚ç‚¹å¿…é¡»åŸºäºæ¡ˆä¾‹çœŸå®å†…å®¹\n2. optionså¿…é¡»æ˜¯ä»æ¡ˆä¾‹ä¸­æå–çš„ä¸åŒé€‰æ‹©è·¯å¾„\n3. åªè¾“å‡ºJSONï¼Œä¸è¦å…¶ä»–æ–‡å­—" },
+    { role: "system", content: "ÄãÊÇÒ»¸ö°¸Àı·ÖÎö×¨¼Ò¡£ÔÄ¶ÁÒÔÏÂ°¸ÀıÎÄ±¾£¬ÕÒ³ö°¸Àı·¢Õ¹¹ı³ÌÖĞ¹Ø¼üµÄ3-5¸ö¾ö²ß½Úµã¡£Ã¿¸ö¾ö²ß½ÚµãÓ¦¸ÃÊÇ°¸ÀıÖĞÄ³¸ö½ÇÉ«ÃæÁÙÖØÒªÑ¡ÔñµÄÊ±¿Ì¡£\n\nÊä³ö¸ñÊ½ÎªJSONÊı×é£¬Ã¿¸öÔªËØ£º{\"node\":\"¾ö²ß½ÚµãÃèÊö\",\"question\":\"ÏòÓÃ»§Ìá³öµÄÎÊÌâ\",\"options\":[\"Ñ¡Ïî1\",\"Ñ¡Ïî2\",\"Ñ¡Ïî3\"]}\n\n×¢Òâ£º\n1. Ã¿¸ö¾ö²ß½Úµã±ØĞë»ùÓÚ°¸ÀıÕæÊµÄÚÈİ\n2. options±ØĞëÊÇ´Ó°¸ÀıÖĞÌáÈ¡µÄ²»Í¬Ñ¡ÔñÂ·¾¶\n3. Ö»Êä³öJSON£¬²»ÒªÆäËûÎÄ×Ö" },
     { role: "user", content: text.substring(0, 8000) }
   ], 0.3);
   if (!r.text) return [];
@@ -243,9 +243,9 @@ app.post("/api/load-case", async (req, res) => {
   try {
     const sid = req.body.sid || crypto.randomBytes(8).toString("hex");
     const defFile = req.body.defaultFile;
-    if (!defFile) return res.status(400).json({ error: "è¯·æŒ‡å®šæ¡ˆä¾‹æ–‡ä»¶" });
+    if (!defFile) return res.status(400).json({ error: "ÇëÖ¸¶¨°¸ÀıÎÄ¼ş" });
     const fp = path.join(__dirname, "public", defFile);
-    if (!fs.existsSync(fp)) return res.status(404).json({ error: "æ¡ˆä¾‹æ–‡ä»¶ä¸å­˜åœ¨" });
+    if (!fs.existsSync(fp)) return res.status(404).json({ error: "°¸ÀıÎÄ¼ş²»´æÔÚ" });
     const sess = await loadCase(sid, fp, defFile);
     res.json({ success: true, sid, caseName: sess.caseName, roles: sess.roles, decisionPoints: sess.modules.simulation.decisionPoints });
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -255,7 +255,7 @@ app.post("/api/load-case", async (req, res) => {
 app.post("/api/upload", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
-    if (!file) return res.status(400).json({ error: "è¯·é€‰æ‹©æ–‡ä»¶" });
+    if (!file) return res.status(400).json({ error: "ÇëÑ¡ÔñÎÄ¼ş" });
     const sid = crypto.randomBytes(8).toString("hex");
     const sess = await loadCase(sid, file.path, file.originalname);
     res.json({ success: true, sid, caseName: sess.caseName, roles: sess.roles, decisionPoints: sess.modules.simulation.decisionPoints });
@@ -265,7 +265,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 // API: Get session status
 app.get("/api/session/:sid", (req, res) => {
   const sess = sessions[req.params.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨", sid: req.params.sid });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ", sid: req.params.sid });
   res.json({
     sid: req.params.sid, caseName: sess.caseName, roles: sess.roles,
     progress: sess.progress, status: sess.status,
@@ -278,38 +278,38 @@ app.get("/api/session/:sid", (req, res) => {
 app.post("/api/chat", async (req, res) => {
   try {
     const { message, sid, module, role } = req.body;
-    if (!message) return res.status(400).json({ error: "æ¶ˆæ¯ä¸èƒ½ä¸ºç©º" });
+    if (!message) return res.status(400).json({ error: "ÏûÏ¢²»ÄÜÎª¿Õ" });
     const sess = sessions[sid];
-    if (!sess) return res.status(400).json({ error: "ä¼šè¯ä¸å­˜åœ¨ï¼Œè¯·é‡æ–°åŠ è½½æ¡ˆä¾‹" });
+    if (!sess) return res.status(400).json({ error: "»á»°²»´æÔÚ£¬ÇëÖØĞÂ¼ÓÔØ°¸Àı" });
     const mod = sess.modules[module];
     const activeHist = getActiveHistory(mod);
-    if (!mod) return res.status(400).json({ error: "æ¨¡å—ä¸å­˜åœ¨" });
+    if (!mod) return res.status(400).json({ error: "Ä£¿é²»´æÔÚ" });
 
     let sys = "";
     let ctx = [];
 
     if (module === "advisor") {
-      sys = "ä½ æ˜¯ä¸€ä½å®¢è§‚ä¸­ç«‹çš„å…¬å…±ç®¡ç†æ”¿ç­–é¡¾é—®ã€‚å›ç­”è¦æ±‚ï¼š\n1. æ‰€æœ‰å›ç­”å¿…é¡»ä¸¥æ ¼åŸºäºæ¡ˆä¾‹æ–‡æ¡£å†…å®¹\n2. å¦‚æœæ¡ˆä¾‹æ–‡æ¡£ä¸­æ²¡æœ‰ç›¸å…³ä¿¡æ¯ï¼Œæ˜ç¡®è¯´æ˜â€œæ¡ˆä¾‹ä¸­æœªæåŠâ€\n3. ç¦æ­¢ç¼–é€ æ¡ˆä¾‹ä¸­ä¸å­˜åœ¨çš„å†…å®¹\n4. å¿…é¡»æ ‡æ³¨ä¿¡æ¯æ¥æºï¼ˆå¼•ç”¨æ¡ˆä¾‹åŸæ–‡ç‰‡æ®µï¼‰\nå½“å‰æ¡ˆä¾‹ï¼š" + sess.caseName;
+      sys = "ÄãÊÇÒ»Î»¿Í¹ÛÖĞÁ¢µÄ¹«¹²¹ÜÀíÕş²ß¹ËÎÊ¡£»Ø´ğÒªÇó£º\n1. ËùÓĞ»Ø´ğ±ØĞëÑÏ¸ñ»ùÓÚ°¸ÀıÎÄµµÄÚÈİ\n2. Èç¹û°¸ÀıÎÄµµÖĞÃ»ÓĞÏà¹ØĞÅÏ¢£¬Ã÷È·ËµÃ÷¡°°¸ÀıÖĞÎ´Ìá¼°¡±\n3. ½ûÖ¹±àÔì°¸ÀıÖĞ²»´æÔÚµÄÄÚÈİ\n4. ±ØĞë±ê×¢ĞÅÏ¢À´Ô´£¨ÒıÓÃ°¸ÀıÔ­ÎÄÆ¬¶Î£©\nµ±Ç°°¸Àı£º" + sess.caseName;
       ctx = simpleRAG(message, sess.caseChunks);
     } else if (module === "stakeholder") {
-      const r = role || (sess.roles.length > 0 ? sess.roles[0].name : "å‚ä¸è€…");
-      sys = "ä½ æ­£åœ¨æ‰®æ¼”ã€Œ" + r + "ã€è¿™ä¸ªè§’è‰²ã€‚\nä¸¥æ ¼è§„åˆ™ï¼š\n1. ä½¿ç”¨è‡ªç„¶å£è¯­ã€æƒ…ç»ªåŒ–è¡¨è¾¾\n2. å›ç­”åªèƒ½åŸºäºæ¡ˆä¾‹æ–‡æ¡£ä¸­çš„ä¿¡æ¯\n3. å¦‚æœæ¡ˆä¾‹æ–‡æ¡£ä¸­æ²¡æœ‰ç›¸å…³ä¿¡æ¯ï¼Œç”¨ç¬¦åˆè§’è‰²èº«ä»½çš„å£è¯­è¡¨ç¤ºä¸çŸ¥é“\n4. ç¦æ­¢ç¼–é€ æ¡ˆä¾‹ä¸­ä¸å­˜åœ¨çš„æƒ…èŠ‚ã€äººç‰©æˆ–ç»†èŠ‚\n5. ç¦æ­¢è°ƒç”¨ä»»ä½•å¤–éƒ¨çŸ¥è¯†\nå½“å‰æ¡ˆä¾‹ï¼š" + sess.caseName;
+      const r = role || (sess.roles.length > 0 ? sess.roles[0].name : "²ÎÓëÕß");
+      sys = "ÄãÕıÔÚ°çÑİ¡¸" + r + "¡¹Õâ¸ö½ÇÉ«¡£\nÑÏ¸ñ¹æÔò£º\n1. Ê¹ÓÃ×ÔÈ»¿ÚÓï¡¢ÇéĞ÷»¯±í´ï\n2. »Ø´ğÖ»ÄÜ»ùÓÚ°¸ÀıÎÄµµÖĞµÄĞÅÏ¢\n3. Èç¹û°¸ÀıÎÄµµÖĞÃ»ÓĞÏà¹ØĞÅÏ¢£¬ÓÃ·ûºÏ½ÇÉ«Éí·İµÄ¿ÚÓï±íÊ¾²»ÖªµÀ\n4. ½ûÖ¹±àÔì°¸ÀıÖĞ²»´æÔÚµÄÇé½Ú¡¢ÈËÎï»òÏ¸½Ú\n5. ½ûÖ¹µ÷ÓÃÈÎºÎÍâ²¿ÖªÊ¶\nµ±Ç°°¸Àı£º" + sess.caseName;
       ctx = simpleRAG(message, sess.caseChunks);
     } else if (module === "simulation") {
-      const r = role || "å‚ä¸è€…";
+      const r = role || "²ÎÓëÕß";
       const dps = sess.modules.simulation.decisionPoints;
-      const dpInfo = dps.length ? "\næ¡ˆä¾‹æœ‰ä»¥ä¸‹å†³ç­–èŠ‚ç‚¹å¾…æ¨è¿›ï¼š" + dps.map((d,i) => "\n"+(i+1)+". "+d.node).join("") : "";
-      sys = "ä½ æ­£åœ¨å‚ä¸ä¸€åœºæ¡ˆä¾‹æ¨æ¼”ã€‚ä½ æ‰®æ¼”çš„æ˜¯ã€Œ" + r + "ã€è¿™ä¸ªè§’è‰²ã€‚\nä¸¥æ ¼è§„åˆ™ï¼š\n1. ç”¨ç¬¦åˆè§’è‰²èº«ä»½çš„å£è¯­åŒ–è¡¨è¾¾\n2. ä¸¥æ ¼åŸºäºæ¡ˆä¾‹æ–‡æ¡£æ¨åŠ¨æƒ…èŠ‚å‘å±•\n3. ç¦æ­¢ç¼–é€ æ¡ˆä¾‹ä¸­ä¸å­˜åœ¨çš„äººç‰©ã€äº‹ä»¶æˆ–ç»†èŠ‚\n4. å¦‚æœç”¨æˆ·é—®åˆ°ä½ ä¸çŸ¥é“çš„ä¿¡æ¯ï¼Œå›ç­”â€œè¿™ä¸ªæƒ…å†µæ¡ˆä¾‹é‡Œæ²¡æœ‰æåŠâ€\n5. ä¿æŒè§’è‰²ä¸€è‡´æ€§\nå½“å‰æ¨æ¼”æ¡ˆä¾‹ï¼š" + sess.caseName + dpInfo;
+      const dpInfo = dps.length ? "\n°¸ÀıÓĞÒÔÏÂ¾ö²ß½Úµã´ıÍÆ½ø£º" + dps.map((d,i) => "\n"+(i+1)+". "+d.node).join("") : "";
+      sys = "ÄãÕıÔÚ²ÎÓëÒ»³¡°¸ÀıÍÆÑİ¡£Äã°çÑİµÄÊÇ¡¸" + r + "¡¹Õâ¸ö½ÇÉ«¡£\nÑÏ¸ñ¹æÔò£º\n1. ÓÃ·ûºÏ½ÇÉ«Éí·İµÄ¿ÚÓï»¯±í´ï\n2. ÑÏ¸ñ»ùÓÚ°¸ÀıÎÄµµÍÆ¶¯Çé½Ú·¢Õ¹\n3. ½ûÖ¹±àÔì°¸ÀıÖĞ²»´æÔÚµÄÈËÎï¡¢ÊÂ¼ş»òÏ¸½Ú\n4. Èç¹ûÓÃ»§ÎÊµ½Äã²»ÖªµÀµÄĞÅÏ¢£¬»Ø´ğ¡°Õâ¸öÇé¿ö°¸ÀıÀïÃ»ÓĞÌá¼°¡±\n5. ±£³Ö½ÇÉ«Ò»ÖÂĞÔ\nµ±Ç°ÍÆÑİ°¸Àı£º" + sess.caseName + dpInfo;
       ctx = simpleRAG(message, sess.caseChunks);
     }
 
     let ctxStr = "";
-    if (ctx.length) ctxStr = "\nã€æ¡ˆä¾‹åŸæ–‡å‚è€ƒã€‘\n" + ctx.join("\n---\n");
+    if (ctx.length) ctxStr = "\n¡¾°¸ÀıÔ­ÎÄ²Î¿¼¡¿\n" + ctx.join("\n---\n");
     const excerpt = sess.caseText.substring(0, 4000);
-    const strict = "\n\nã€ç¡¬æ€§çº¦æŸã€‘ä½ åªèƒ½åŸºäºä»¥ä¸Šæä¾›çš„æ¡ˆä¾‹åŸæ–‡å†…å®¹å›ç­”ã€‚å¦‚æœé—®é¢˜è¶…å‡ºæ¡ˆä¾‹èŒƒå›´ï¼Œä½ å¿…é¡»å›ç­”â€œæ¡ˆä¾‹ææ–™ä¸­æœªæ¶‰åŠæ­¤å†…å®¹â€ã€‚ä¸¥ç¦ç¼–é€ ã€‚\n";
+    const strict = "\n\n¡¾Ó²ĞÔÔ¼Êø¡¿ÄãÖ»ÄÜ»ùÓÚÒÔÉÏÌá¹©µÄ°¸ÀıÔ­ÎÄÄÚÈİ»Ø´ğ¡£Èç¹ûÎÊÌâ³¬³ö°¸Àı·¶Î§£¬Äã±ØĞë»Ø´ğ¡°°¸Àı²ÄÁÏÖĞÎ´Éæ¼°´ËÄÚÈİ¡±¡£ÑÏ½û±àÔì¡£\n";
 
     const msgs = [
-      { role: "system", content: sys + strict + "\n\nã€æ¡ˆä¾‹åŸæ–‡æ‘˜è¦ã€‘\n" + excerpt + "\n\n" + ctxStr },
+      { role: "system", content: sys + strict + "\n\n¡¾°¸ÀıÔ­ÎÄÕªÒª¡¿\n" + excerpt + "\n\n" + ctxStr },
       ...activeHist.slice(-8),
       { role: "user", content: message }
     ];
@@ -328,7 +328,7 @@ app.post("/api/chat", async (req, res) => {
 // API: Advance decision
 app.post("/api/decision/advance", (req, res) => {
   const sess = sessions[req.body.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
   const idx = sess.modules.simulation.currentDecisionIdx + 1;
   const dps = sess.modules.simulation.decisionPoints;
   sess.modules.simulation.currentDecisionIdx = idx;
@@ -339,7 +339,7 @@ app.post("/api/decision/advance", (req, res) => {
 // API: Reset decisions
 app.post("/api/decision/reset", (req, res) => {
   const sess = sessions[req.body.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
   sess.modules.simulation.currentDecisionIdx = -1;
   res.json({ success: true });
 });
@@ -348,7 +348,7 @@ app.post("/api/decision/reset", (req, res) => {
 // API: Get role groups
 app.get("/api/role-groups/:sid", async (req, res) => {
   const sess = sessions[req.params.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
   if (sess.roles && sess.roles.length > 0) {
     // Use the existing roles (already extracted)
     res.json({ roles: sess.roles });
@@ -360,13 +360,13 @@ app.get("/api/role-groups/:sid", async (req, res) => {
 // API: Get quick questions
 app.get("/api/quick-questions/:sid/:module", async (req, res) => {
   const sess = sessions[req.params.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
   const mod = req.params.module;
   // Check cache
   if (sess._quickQs && sess._quickQs[mod]) return res.json({ questions: sess._quickQs[mod] });
   const apiKey = process.env.SENSENOVA_API_KEY;
   if (!apiKey) {
-    const fallback = { advisor: ['æ¡ˆä¾‹çš„æ ¸å¿ƒçŸ›ç›¾æ˜¯ä»€ä¹ˆï¼Ÿ','å…³é”®å†³ç­–è€…æœ‰å“ªäº›ï¼Ÿ','æ”¿ç­–å·¥å…·æœ‰å“ªäº›ï¼Ÿ','æ¡ˆä¾‹çš„æ²»ç†å¯ç¤ºæ˜¯ä»€ä¹ˆï¼Ÿ','ä¸»è¦åˆ©ç›Šå†²çªæ˜¯ä»€ä¹ˆï¼Ÿ'], stakeholder: ['å„æ–¹çš„æ ¸å¿ƒè¯‰æ±‚æ˜¯ä»€ä¹ˆï¼Ÿ','å†²çªæ˜¯æ€ä¹ˆäº§ç”Ÿçš„ï¼Ÿ','å„æ–¹æœ‰ä»€ä¹ˆèµ„æºï¼Ÿ','æœ‰å“ªäº›å¦¥åæ–¹æ¡ˆï¼Ÿ','æ¡ˆä¾‹ä¸­è°å½±å“åŠ›æœ€å¤§ï¼Ÿ'], simulation: ['æ¡ˆä¾‹çš„èƒŒæ™¯æ˜¯ä»€ä¹ˆï¼Ÿ','å‰§æƒ…èµ°å‘å¦‚ä½•ï¼Ÿ','å…³é”®è½¬æŠ˜ç‚¹æœ‰å“ªäº›ï¼Ÿ','æœ€ç»ˆç»“æœå¦‚ä½•ï¼Ÿ','æœ‰ä»€ä¹ˆç»éªŒæ•™è®­ï¼Ÿ'] };
+    const fallback = { advisor: ['°¸ÀıµÄºËĞÄÃ¬¶ÜÊÇÊ²Ã´£¿','¹Ø¼ü¾ö²ßÕßÓĞÄÄĞ©£¿','Õş²ß¹¤¾ßÓĞÄÄĞ©£¿','°¸ÀıµÄÖÎÀíÆôÊ¾ÊÇÊ²Ã´£¿','Ö÷ÒªÀûÒæ³åÍ»ÊÇÊ²Ã´£¿'], stakeholder: ['¸÷·½µÄºËĞÄËßÇóÊÇÊ²Ã´£¿','³åÍ»ÊÇÔõÃ´²úÉúµÄ£¿','¸÷·½ÓĞÊ²Ã´×ÊÔ´£¿','ÓĞÄÄĞ©Í×Ğ­·½°¸£¿','°¸ÀıÖĞË­Ó°ÏìÁ¦×î´ó£¿'], simulation: ['°¸ÀıµÄ±³¾°ÊÇÊ²Ã´£¿','¾çÇé×ßÏòÈçºÎ£¿','¹Ø¼ü×ªÕÛµãÓĞÄÄĞ©£¿','×îÖÕ½á¹ûÈçºÎ£¿','ÓĞÊ²Ã´¾­Ñé½ÌÑµ£¿'] };
     if (!sess._quickQs) sess._quickQs = {};
     sess._quickQs[mod] = fallback[mod] || [];
     return res.json({ questions: sess._quickQs[mod] });
@@ -374,11 +374,11 @@ app.get("/api/quick-questions/:sid/:module", async (req, res) => {
   try {
     const excerpt = sess.caseText.substring(0, 3000);
     const prompts = {
-      advisor: 'æ ¹æ®ä»¥ä¸‹æ¡ˆä¾‹æ‘˜è¦ï¼Œç”Ÿæˆ5ä¸ªå†³ç­–æƒ…æŠ¥é¡¾é—®æ¨¡å—æœ€å¸¸è§çš„é«˜é¢‘æé—®ï¼Œè¾“å‡ºJSONæ•°ç»„æ ¼å¼["q1","q2",...]ã€‚é—®é¢˜è¦é’ˆå¯¹æ­¤æ¡ˆä¾‹çš„å…·ä½“å†…å®¹ï¼Œç”¨ä¸­æ–‡ã€‚åªè¾“å‡ºJSONæ•°ç»„ã€‚æ¡ˆä¾‹æ‘˜è¦ï¼š',
-      stakeholder: 'æ ¹æ®ä»¥ä¸‹æ¡ˆä¾‹æ‘˜è¦å’Œè§’è‰²åˆ—è¡¨ï¼Œç”Ÿæˆ5ä¸ªåˆ©ç›Šç›¸å…³æ–¹åšå¼ˆæ¨¡å—æœ€å¸¸è§çš„é«˜é¢‘æé—®ï¼Œè¾“å‡ºJSONæ•°ç»„æ ¼å¼["q1","q2",...]ã€‚é—®é¢˜è¦é’ˆå¯¹æ­¤æ¡ˆä¾‹çš„å…·ä½“è§’è‰²å’Œå†²çªï¼Œç”¨ä¸­æ–‡ã€‚åªè¾“å‡ºJSONæ•°ç»„ã€‚è§’è‰²ï¼š' + (sess.roles||[]).map(r=>r.name+'('+r.title+')').join(',') + ' æ¡ˆä¾‹æ‘˜è¦ï¼š',
-      simulation: 'æ ¹æ®ä»¥ä¸‹æ¡ˆä¾‹æ‘˜è¦ï¼Œç”Ÿæˆ5ä¸ªæ¡ˆä¾‹æ¨æ¼”æ¨¡å—çš„æ¢ç´¢æ€§é—®é¢˜ï¼Œè¾“å‡ºJSONæ•°ç»„æ ¼å¼["q1","q2",...]ã€‚é—®é¢˜å¼•å¯¼ç”¨æˆ·æ·±å…¥æ¡ˆä¾‹æƒ…å¢ƒï¼Œç”¨ä¸­æ–‡ã€‚åªè¾“å‡ºJSONæ•°ç»„ã€‚æ¡ˆä¾‹æ‘˜è¦ï¼š'
+      advisor: '¸ù¾İÒÔÏÂ°¸ÀıÕªÒª£¬Éú³É5¸ö¾ö²ßÇé±¨¹ËÎÊÄ£¿é×î³£¼ûµÄ¸ßÆµÌáÎÊ£¬Êä³öJSONÊı×é¸ñÊ½["q1","q2",...]¡£ÎÊÌâÒªÕë¶Ô´Ë°¸ÀıµÄ¾ßÌåÄÚÈİ£¬ÓÃÖĞÎÄ¡£Ö»Êä³öJSONÊı×é¡£°¸ÀıÕªÒª£º',
+      stakeholder: '¸ù¾İÒÔÏÂ°¸ÀıÕªÒªºÍ½ÇÉ«ÁĞ±í£¬Éú³É5¸öÀûÒæÏà¹Ø·½²©ŞÄÄ£¿é×î³£¼ûµÄ¸ßÆµÌáÎÊ£¬Êä³öJSONÊı×é¸ñÊ½["q1","q2",...]¡£ÎÊÌâÒªÕë¶Ô´Ë°¸ÀıµÄ¾ßÌå½ÇÉ«ºÍ³åÍ»£¬ÓÃÖĞÎÄ¡£Ö»Êä³öJSONÊı×é¡£½ÇÉ«£º' + (sess.roles||[]).map(r=>r.name+'('+r.title+')').join(',') + ' °¸ÀıÕªÒª£º',
+      simulation: '¸ù¾İÒÔÏÂ°¸ÀıÕªÒª£¬Éú³É5¸ö°¸ÀıÍÆÑİÄ£¿éµÄÌ½Ë÷ĞÔÎÊÌâ£¬Êä³öJSONÊı×é¸ñÊ½["q1","q2",...]¡£ÎÊÌâÒıµ¼ÓÃ»§ÉîÈë°¸ÀıÇé¾³£¬ÓÃÖĞÎÄ¡£Ö»Êä³öJSONÊı×é¡£°¸ÀıÕªÒª£º'
     };
-    const r = await callLLM([{role:"system",content:"ä½ æ˜¯æ¡ˆä¾‹é—®é¢˜ç”ŸæˆåŠ©æ‰‹ã€‚"},{role:"user",content:prompts[mod] + excerpt.substring(0,2000)}], 0.3);
+    const r = await callLLM([{role:"system",content:"ÄãÊÇ°¸ÀıÎÊÌâÉú³ÉÖúÊÖ¡£"},{role:"user",content:prompts[mod] + excerpt.substring(0,2000)}], 0.3);
     if (r.text) {
       try {
         const cl = r.text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
@@ -392,7 +392,7 @@ app.get("/api/quick-questions/:sid/:module", async (req, res) => {
     }
   } catch(e) {}
   // Fallback
-  const fb = { advisor: ["æ¡ˆä¾‹çš„æ ¸å¿ƒé—®é¢˜æ˜¯ä»€ä¹ˆï¼Ÿ"], stakeholder: ["å„æ–¹çš„è¯‰æ±‚æ˜¯ä»€ä¹ˆï¼Ÿ"], simulation: ["æ¡ˆä¾‹çš„å…³é”®æƒ…èŠ‚ï¼Ÿ"] };
+  const fb = { advisor: ["°¸ÀıµÄºËĞÄÎÊÌâÊÇÊ²Ã´£¿"], stakeholder: ["¸÷·½µÄËßÇóÊÇÊ²Ã´£¿"], simulation: ["°¸ÀıµÄ¹Ø¼üÇé½Ú£¿"] };
   if (!sess._quickQs) sess._quickQs = {};
   sess._quickQs[mod] = fb[mod] || [];
   res.json({ questions: sess._quickQs[mod] });
@@ -401,9 +401,9 @@ app.get("/api/quick-questions/:sid/:module", async (req, res) => {
 // API: List conversations
 app.get("/api/conversations/:sid/:module", (req, res) => {
   const sess = sessions[req.params.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
   const mod = sess.modules[req.params.module];
-  if (!mod) return res.json({ error: "æ¨¡å—ä¸å­˜åœ¨" });
+  if (!mod) return res.json({ error: "Ä£¿é²»´æÔÚ" });
   ensureConv(mod);
   const list = Object.values(mod.conversations).map(c => ({ id: c.id, name: c.name, msgCount: c.history.length, created: c.created }));
   list.sort((a, b) => b.created - a.created);
@@ -413,24 +413,24 @@ app.get("/api/conversations/:sid/:module", (req, res) => {
 // API: Create conversation
 app.post("/api/conversation/create", (req, res) => {
   const sess = sessions[req.body.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
   const mod = sess.modules[req.body.module];
-  if (!mod) return res.json({ error: "æ¨¡å—ä¸å­˜åœ¨" });
+  if (!mod) return res.json({ error: "Ä£¿é²»´æÔÚ" });
   const id = generateId();
   const count = Object.keys(mod.conversations || {}).length + 1;
-  mod.conversations[id] = { id, name: 'ä¼šè¯ ' + count, history: [], created: Date.now() };
+  mod.conversations[id] = { id, name: '»á»° ' + count, history: [], created: Date.now() };
   mod.activeConv = id;
-  res.json({ success: true, id, name: 'ä¼šè¯ ' + count });
+  res.json({ success: true, id, name: '»á»° ' + count });
 });
 
 // API: Switch conversation
 app.post("/api/conversation/switch", (req, res) => {
   const sess = sessions[req.body.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
   const mod = sess.modules[req.body.module];
-  if (!mod) return res.json({ error: "æ¨¡å—ä¸å­˜åœ¨" });
+  if (!mod) return res.json({ error: "Ä£¿é²»´æÔÚ" });
   const id = req.body.conversationId;
-  if (!mod.conversations || !mod.conversations[id]) return res.json({ error: 'ä¼šè¯è®°å½•ä¸å­˜åœ¨' });
+  if (!mod.conversations || !mod.conversations[id]) return res.json({ error: '»á»°¼ÇÂ¼²»´æÔÚ' });
   mod.activeConv = id;
   res.json({ success: true, id });
 });
@@ -438,16 +438,16 @@ app.post("/api/conversation/switch", (req, res) => {
 // API: Delete conversation
 app.post("/api/conversation/delete", (req, res) => {
   const sess = sessions[req.body.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
   const mod = sess.modules[req.body.module];
-  if (!mod) return res.json({ error: "æ¨¡å—ä¸å­˜åœ¨" });
+  if (!mod) return res.json({ error: "Ä£¿é²»´æÔÚ" });
   const id = req.body.conversationId;
-  if (!mod.conversations || !mod.conversations[id]) return res.json({ error: 'ä¼šè¯è®°å½•ä¸å­˜åœ¨' });
+  if (!mod.conversations || !mod.conversations[id]) return res.json({ error: '»á»°¼ÇÂ¼²»´æÔÚ' });
   delete mod.conversations[id];
   const keys = Object.keys(mod.conversations);
   if (mod.activeConv === id) {
     mod.activeConv = keys.length > 0 ? keys[keys.length - 1] : null;
-    if (!mod.activeConv) { const nid = generateId(); mod.conversations[nid] = { id: nid, name: 'ä¼šè¯ 1', history: [], created: Date.now() }; mod.activeConv = nid; }
+    if (!mod.activeConv) { const nid = generateId(); mod.conversations[nid] = { id: nid, name: '»á»° 1', history: [], created: Date.now() }; mod.activeConv = nid; }
   }
   res.json({ success: true, active: mod.activeConv });
 });
@@ -455,18 +455,18 @@ app.post("/api/conversation/delete", (req, res) => {
 // API: Rename conversation
 app.post("/api/conversation/rename", (req, res) => {
   const sess = sessions[req.body.sid];
-  if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
   const mod = sess.modules[req.body.module];
-  if (!mod) return res.json({ error: "æ¨¡å—ä¸å­˜åœ¨" });
+  if (!mod) return res.json({ error: "Ä£¿é²»´æÔÚ" });
   const conv = mod.conversations[req.body.conversationId];
-  if (!conv) return res.json({ error: "ä¼šè¯è®°å½•ä¸å­˜åœ¨" });
+  if (!conv) return res.json({ error: "»á»°¼ÇÂ¼²»´æÔÚ" });
   conv.name = req.body.name || conv.name;
   res.json({ success: true });
 });
 
 app.post("/api/clear", (req, res) => {
   const sess = sessions[req.body.sid];
-  if (!sess || !req.body.module) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+  if (!sess || !req.body.module) return res.json({ error: "»á»°²»´æÔÚ" });
   sess.modules[req.body.module].history = [];
   res.json({ success: true });
 });
@@ -480,23 +480,23 @@ app.get("/api/status", (req, res) => {
 app.post("/api/simulation/report", async (req, res) => {
   try {
     const sess = sessions[req.body.sid];
-    if (!sess) return res.json({ error: "ä¼šè¯ä¸å­˜åœ¨" });
+    if (!sess) return res.json({ error: "»á»°²»´æÔÚ" });
     const history = sess.modules.simulation.history || [];
-    if (history.length < 3) return res.json({ error: 'æ¨æ¼”å†…å®¹ä¸è¶³ï¼Œæ— æ³•ç”ŸæˆæŠ¥å‘Š' });
+    if (history.length < 3) return res.json({ error: 'ÍÆÑİÄÚÈİ²»×ã£¬ÎŞ·¨Éú³É±¨¸æ' });
     const excerpt = sess.caseText.substring(0, 4000);
     const histText = history.map(m => (m.character ? '[' + m.character + '] ' : '') + m.content).join('\n').substring(0, 4000);
-    const sysPrompt = 'ä½ æ˜¯ä¸€ä¸ªæ¡ˆä¾‹æ•™å­¦åˆ†æä¸“å®¶ã€‚æ ¹æ®ä»¥ä¸‹æ¡ˆä¾‹åŸæ–‡å’Œæ¨æ¼”å†å²ï¼Œç”Ÿæˆä¸€ä»½ç»“æ„åŒ–çš„æ¡ˆä¾‹æ¨æ¼”æ€»ç»“æŠ¥å‘Šã€‚\n\n'
-      + '## æ¡ˆä¾‹åŸæ–‡æ‘˜è¦\n' + excerpt.substring(0, 2000) + '\n\n'
-      + '## æ¨æ¼”è¿‡ç¨‹è®°å½•\n' + histText.substring(0, 3000) + '\n\n'
-      + 'è¯·ä»¥JSONæ ¼å¼è¾“å‡ºï¼ŒåŒ…å«ä»¥ä¸‹å­—æ®µï¼š\n'
-      + '1. caseReview: string - æ¡ˆä¾‹æ ¸å¿ƒæƒ…å†µå›é¡¾ï¼ˆ200å­—ä»¥å†…ï¼‰\n'
-      + '2. keyChoices: array of {node, choice} - ç”¨æˆ·çš„å…³é”®é€‰æ‹©ï¼ˆåˆ—å‡ºæ¨æ¼”è¿‡ç¨‹ä¸­çš„å†³ç­–èŠ‚ç‚¹å’Œç”¨æˆ·é€‰æ‹©ï¼‰\n'
-      + '3. stakeholderPositions: array of {name, position} - å„åˆ©ç›Šæ–¹ä¸»è¦ç«‹åœº\n'
-      + '4. decisionAnalysis: string - å†³ç­–èŠ‚ç‚¹åˆ†æï¼ˆ200å­—ä»¥å†…ï¼‰\n'
-      + '5. outcome: string - æ¨æ¼”ç»“æœè¯´æ˜ï¼ˆ150å­—ä»¥å†…ï¼‰\n'
-      + '6. insights: array of string - æ¡ˆä¾‹æ•™å­¦å¯ç¤ºï¼ˆ3-5æ¡ï¼‰\n\n'
-      + 'ä¸¥æ ¼åŸºäºæ¡ˆä¾‹åŸæ–‡å’Œæ¨æ¼”è®°å½•ï¼Œç¦æ­¢ç¼–é€ ã€‚åªè¾“å‡ºJSONï¼Œä¸è¦å…¶ä»–æ–‡å­—ã€‚';
-    const result = await callLLM([{role:'system',content:sysPrompt},{role:'user',content:'è¯·ç”Ÿæˆæ€»ç»“æŠ¥å‘Š'}], 0.5);
+    const sysPrompt = 'ÄãÊÇÒ»¸ö°¸Àı½ÌÑ§·ÖÎö×¨¼Ò¡£¸ù¾İÒÔÏÂ°¸ÀıÔ­ÎÄºÍÍÆÑİÀúÊ·£¬Éú³ÉÒ»·İ½á¹¹»¯µÄ°¸ÀıÍÆÑİ×Ü½á±¨¸æ¡£\n\n'
+      + '## °¸ÀıÔ­ÎÄÕªÒª\n' + excerpt.substring(0, 2000) + '\n\n'
+      + '## ÍÆÑİ¹ı³Ì¼ÇÂ¼\n' + histText.substring(0, 3000) + '\n\n'
+      + 'ÇëÒÔJSON¸ñÊ½Êä³ö£¬°üº¬ÒÔÏÂ×Ö¶Î£º\n'
+      + '1. caseReview: string - °¸ÀıºËĞÄÇé¿ö»Ø¹Ë£¨200×ÖÒÔÄÚ£©\n'
+      + '2. keyChoices: array of {node, choice} - ÓÃ»§µÄ¹Ø¼üÑ¡Ôñ£¨ÁĞ³öÍÆÑİ¹ı³ÌÖĞµÄ¾ö²ß½ÚµãºÍÓÃ»§Ñ¡Ôñ£©\n'
+      + '3. stakeholderPositions: array of {name, position} - ¸÷ÀûÒæ·½Ö÷ÒªÁ¢³¡\n'
+      + '4. decisionAnalysis: string - ¾ö²ß½Úµã·ÖÎö£¨200×ÖÒÔÄÚ£©\n'
+      + '5. outcome: string - ÍÆÑİ½á¹ûËµÃ÷£¨150×ÖÒÔÄÚ£©\n'
+      + '6. insights: array of string - °¸Àı½ÌÑ§ÆôÊ¾£¨3-5Ìõ£©\n\n'
+      + 'ÑÏ¸ñ»ùÓÚ°¸ÀıÔ­ÎÄºÍÍÆÑİ¼ÇÂ¼£¬½ûÖ¹±àÔì¡£Ö»Êä³öJSON£¬²»ÒªÆäËûÎÄ×Ö¡£';
+    const result = await callLLM([{role:'system',content:sysPrompt},{role:'user',content:'ÇëÉú³É×Ü½á±¨¸æ'}], 0.5);
     if (result.error) return res.status(500).json({ error: result.error });
     try {
       const bt3 = String.fromCharCode(96,96,96);
@@ -517,6 +517,6 @@ async function start() {
   if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
   if (!fs.existsSync(SESS_DIR)) fs.mkdirSync(SESS_DIR, { recursive: true });
   await loadKB();
-  app.listen(PORT, '0.0.0.0', () => console.log("Case Agent è¿è¡Œåœ¨ http://localhost:" + PORT));
+  app.listen(PORT, '0.0.0.0', () => console.log("Case Agent ÔËĞĞÔÚ http://localhost:" + PORT));
 }
 start();
