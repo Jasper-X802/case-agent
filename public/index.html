@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Agent</title>
+<link rel="icon" href="/icon.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app"></div>
+
+<template id="home-page">
+<div class="page home">
+  <header class="topbar">
+    <div class="logo"><img src="/icon.png" class="logo-img"> Case Agent</div>
+    <div class="topbar-actions">
+      <span class="chip" id="home-status">系统就绪</span>
+      <button class="btn-icon" id="home-theme">🌓</button>
+    </div>
+  </header>
+  <main class="home-body">
+    <div class="hero">
+      <h1>案例智能体</h1>
+      <p>基于AI大模型的对话式案例助手——答疑解惑 · 模拟推演 · 多方博弈</p>
+    </div>
+    <div class="upload-area" id="upload-zone">
+      <div class="upload-icon">📄</div>
+      <p><strong>点击上传案例文件</strong> 或拖拽至此</p>
+      <p class="hint">支持 .docx / .pdf / .txt，最大50MB</p>
+      <input type="file" id="file-input" accept=".docx,.pdf,.txt" hidden>
+      <button class="btn btn-primary" id="upload-btn">选择文件</button>
+    </div>
+    <div class="divider"><span>或使用默认案例</span></div>
+    <div class="case-grid" id="case-grid">
+      <div class="skel"><div class="sl w60"></div><div class="sl w90"></div></div>
+      <div class="skel"><div class="sl w60"></div><div class="sl w90"></div></div>
+    </div>
+  </main>
+</div>
+</template>
+
+<template id="sim-page">
+<div class="page sim">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <button class="btn btn-new" id="btn-new-conv">＋ 新对话</button>
+    </div>
+    <div class="sidebar-list" id="conv-list"></div>
+  </aside>
+  <div class="sim-main">
+    <header class="topbar">
+      <div class="topbar-start">
+        <button class="btn btn-ghost" id="btn-menu">☰</button>
+        <div class="tab-group" id="tab-bar">
+          <button class="tab active" data-tab="advisor">📊 决策情报顾问</button>
+          <button class="tab" data-tab="stakeholder">🎭 利益相关方博弈</button>
+          <button class="tab" data-tab="simulation">🎬 案例推演</button>
+        </div>
+      </div>
+      <div class="topbar-end">
+        <span class="chip" id="sim-case-label"></span>
+        <button class="btn-icon" id="sim-theme">🌓</button>
+        <button class="btn btn-ghost" id="back-home">← 返回</button>
+      </div>
+    </header>
+    <div class="tab-content active" id="tab-advisor">
+      <div class="msgs" id="msgs-advisor"><div class="welc"><h3>📊 决策情报顾问</h3><p>向我提问，获取基于案例的专业分析。</p></div></div>
+      <div class="input-bar"><textarea rows="1" placeholder="向顾问提问......" id="inp-advisor"></textarea><button class="btn-send" data-mod="advisor">➤</button></div>
+    </div>
+    <div class="tab-content" id="tab-stakeholder">
+      <div class="msgs" id="msgs-stakeholder"><div class="welc"><h3>🎭 利益相关方博弈</h3><p>选择角色，模拟与案例中各方的对话。</p></div></div>
+      <div class="input-bar"><textarea rows="1" placeholder="与角色对话......" id="inp-stakeholder"></textarea><button class="btn-send" data-mod="stakeholder">➤</button></div>
+    </div>
+    <div class="tab-content" id="tab-simulation">
+      <div class="msgs" id="msgs-simulation"><div class="welc"><h3>🎬 案例推演</h3><p>点击开始推演后自动展开案例剧情，每轮结束后弹出决策弹窗。</p></div></div>
+      <div class="sim-start" id="sim-start-area">
+        <button class="btn btn-primary btn-lg" id="btn-start-sim">▶ 开始推演</button>
+      </div>
+      <div class="input-bar" id="sim-input-area" style="display:none"><textarea rows="1" placeholder="参与推演......" id="inp-simulation"></textarea><button class="btn-send" data-mod="simulation">➤</button></div>
+    </div>
+  </div>
+</div>
+</template>
+
+<template id="decision-modal">
+<div class="modal-overlay" id="dec-overlay">
+  <div class="modal glass">
+    <div class="modal-head"><h3>🎯 决策节点</h3><span class="modal-x" id="dec-close">✕</span></div>
+    <div class="modal-body">
+      <div class="dn" id="dec-node"></div>
+      <div class="dq" id="dec-question"></div>
+      <div class="dopts" id="dec-options"></div>
+      <div class="dcustom"><textarea id="dec-input" rows="2" placeholder="或自定义您的决策发言......"></textarea><button class="btn btn-primary" id="dec-submit">提交决策</button></div>
+    </div>
+  </div>
+</div>
+</template>
+
+<template id="progress-overlay">
+<div class="prog-overlay" id="prog-overlay">
+  <div class="prog-card glass">
+    <h3>加载案例</h3>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <p class="prog-txt" id="prog-txt">加载中...</p>
+  </div>
+</div>
+</template>
+
+<script src="/app.js"></script>
+</body>
+</html>
