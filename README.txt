@@ -1,7 +1,6 @@
 Case Agent - 案例智能体
 ====================
 基于AI大模型的对话式案例助手
-清华大学公共管理案例创新奖参赛作品
 
 启动方式：
   1. 双击 start.bat
@@ -23,5 +22,3 @@ Case Agent - 案例智能体
   - Node.js + Express
   - 商汤日日新 API (deepseek-v4-flash)
   - 纯前端 SPA (无框架依赖)
-
-作者：清华大学公共管理学院
